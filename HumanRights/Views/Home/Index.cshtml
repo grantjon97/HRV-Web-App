@@ -1,31 +1,65 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Human Rights Violation Articles";
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+@model HumanRights.ViewModels.ArticleView
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+<input hidden id="articleId" value="@(Model.Article.Id)"/>
+
+@using (Html.BeginForm("Submit", "Home", FormMethod.Post, new { id = "form" }))
+{
+    @Html.HiddenFor(p => p.Article.IsViolation, new { id = "isViolation" })
+    @Html.HiddenFor(p => p.Article.Id, new { value=Model.Article.Id})
+
+    <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+        <main class="inner cover" role="main">
+            <h1 class="cover-heading">@(Model.ArticlesReviewed)/@(Model.TotalArticles) articles reviewed</h1>
+            <hr />
+            <p class="lead" style="line-height: 1.6">@(Model.Article.Text)</p>
+            <hr />
+            <p class="lead">Is this article a human rights violation?</p>
+            <p>
+                <button type="button" class="btn btn-lg btn-success" onclick="answer('NOT a violation')">NOT A VIOLATION</button>
+                <button type="button" class="btn btn-lg btn-danger" onclick="answer('a violation')">VIOLATION</button>
+            </p>
+            <p class="lead">Comments: @Html.TextBoxFor(p => p.Article.Comment, new { style = "color: black;" })</p>
+        </main>
     </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>
+}
+
+<script>
+    function save() {
+        $.ajax({
+            async: false,
+            url: "/Home/SaveChanges?id=" + (document).getElementById("articleId").value
+        });
+    }
+
+    // Both of these are needed because some browsers will only call functions
+    // onbeforeunload, and some will only call functions onunload.
+    window.onbeforeunload = save;
+    window.onunload = save;
+
+    function answer(buttonValue) {
+
+        (document).getElementById("isViolation").value = (buttonValue === "a violation");
+
+        bootbox.confirm("<div style='color:black'><strong>Submit that this is "
+            + buttonValue
+            + "?</strong></div>",
+            function (result) {
+                if (result) {
+
+                    $("#form").submit();
+
+                    //$.ajax({
+                    //    url: "/Home/Submit?id=" + (document).getElementById("articleId").value +
+                    //        "&isViolation=" + isViolation,
+                    //    success: function (result) {
+                    //        location.reload();
+                    //    }
+                    //});
+                }
+            });
+    }
+</script>

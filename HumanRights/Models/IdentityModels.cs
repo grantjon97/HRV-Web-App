@@ -20,8 +20,10 @@ namespace HumanRights.Models
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public DbSet<Article> Articles { get; set; }
+
         public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+            : base("HumanRightsContext", throwIfV1Schema: false)
         {
         }
 
